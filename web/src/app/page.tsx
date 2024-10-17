@@ -31,12 +31,16 @@ export default function Home({ toggleTheme, toggleFont }) {
         }
     }, []);
 
+<<<<<<< Updated upstream
     const handleSearch = () => {
         // Imprime los valores de las coordenadas y el radio en la consola
         console.log('Coordenada X:', coords.lat);
         console.log('Coordenada Y:', coords.lon);
         console.log('Radio (km):', radio);
     };
+=======
+  const [coordinates, setCoordinates] = useState({ lat: '', lon: '', radius: '100' });
+>>>>>>> Stashed changes
 
     return (
         <Container>
@@ -80,6 +84,7 @@ export default function Home({ toggleTheme, toggleFont }) {
                 </FontSwitch>
             </Header>
 
+<<<<<<< Updated upstream
             <MainContent>
                 {!selectedEmbalse ? (
                     <>
@@ -109,6 +114,108 @@ export default function Home({ toggleTheme, toggleFont }) {
             </MainContent>
         </Container>
     );
+=======
+  const toggleFont = () => {
+    setIsDyslexic(prev => !prev); // Alternar entre fuentes
+  };
+
+  const handleCoordinateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCoordinates(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Coordenadas:', coordinates);
+    // Aquí podrías manejar las coordenadas (enviar a un backend, etc.)
+  };
+
+  // Efecto para cambiar el fondo del body al color del tema
+  useEffect(() => {
+    document.body.style.backgroundColor = themes[theme].background;
+  }, [theme]);
+
+  return (
+    <ThemeProvider theme={themes[theme]}>
+      <MainContent isDyslexic={isDyslexic}>
+        <Header>
+          <ThemeSwitch>
+            <Button onClick={() => toggleTheme('light')} title="Tema claro">
+              🌞 {/* Sol */}
+            </Button>
+            <Button onClick={() => toggleTheme('dark')} title="Tema oscuro">
+              🌜 {/* Luna */}
+            </Button>
+            <Button onClick={() => toggleTheme('daltonic')} title="Tema daltónico">
+              🔶 {/* Círculo amarillo */}
+            </Button>
+            <Button onClick={toggleFont} title="Cambiar a fuente disléxica">
+              Cambiar a Fuente {isDyslexic ? 'Normal' : 'Disléxica'}
+            </Button>
+          </ThemeSwitch>
+          <InputSection onSubmit={handleSubmit}>
+            <InputField>
+              <label htmlFor="x">Latitud:</label>
+              <input
+                type="text"
+                name="x"
+                value={coordinates.lat}
+                onChange={handleCoordinateChange}
+              />
+            </InputField>
+            <InputField>
+              <label htmlFor="y">Longitud:</label>
+              <input
+                type="text"
+                name="y"
+                value={coordinates.lon}
+                onChange={handleCoordinateChange}
+              />
+            </InputField>
+            <InputField>
+              <label htmlFor="radius">Radio:</label>
+              <input
+                type="text"
+                name="radius"
+                value={coordinates.radius}
+                onChange={handleCoordinateChange}
+              />
+            </InputField>
+            <Button type="submit">Enviar</Button>
+          </InputSection>
+        </Header>
+
+        <MainSection>
+          {!selectedEmbalse ? (
+            <>
+              <h1>Lista de Embalses</h1>
+              <EmbalseList>
+                {embalsesEjemplo.map((embalse) => (
+                  <EmbalseItem key={embalse.id} onClick={() => setSelectedEmbalse(embalse)}>
+                    {embalse.nombre}
+                  </EmbalseItem>
+                ))}
+              </EmbalseList>
+            </>
+          ) : (
+            <>
+              <h1>Detalles del Embalse</h1>
+              <EmbalseDetails>
+                <h2>{selectedEmbalse.nombre}</h2>
+                <p>Capacidad: {selectedEmbalse.capacidad}</p>
+                <p>Localidad: {selectedEmbalse.localidad}</p>
+                <p>Demarcación: {selectedEmbalse.demarcacion}</p>
+                <p>Coordenadas: {selectedEmbalse.coordenadas}</p>
+                <p>Radio: {selectedEmbalse.radio}</p>
+              </EmbalseDetails>
+              <BackButton onClick={() => setSelectedEmbalse(null)}>Volver</BackButton>
+            </>
+          )}
+        </MainSection>
+      </MainContent>
+    </ThemeProvider>
+  );
+>>>>>>> Stashed changes
 }
 
 const Container = styled.div`
