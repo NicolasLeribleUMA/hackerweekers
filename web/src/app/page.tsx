@@ -41,49 +41,70 @@ async function getEmbalses() {
   const res = await fetch('https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/embalses/');
   const data = await res.json();
 
-  // Extraer y devolver una lista de objetos con id y ambito_nombre
-  return data.items.map(item => ({
-    id: item.id,               
+  return data.items.map((item) => ({
+    id: item.id,
     embalse_nombre: item.embalse_nombre,
     ambito_nombre: item.ambito_nombre,
     agua_total: item.agua_total,
     electrico_flag: item.electrico_flag,
     longitud: getLong(item.id),
-    latitud: getLati(item.id)
+    latitud: getLati(item.id),
   }));
 }
 
 async function getLong(id) {
-  const res = await fetch(`https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/listado_embalses/?q={"id_embalse":{"$eq":${id}}}`);
+  const res = await fetch(
+    `https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/listado_embalses/?q={"id_embalse":{"$eq":${id}}}`
+  );
   const data = await res.json();
 
-  if(data.items[0] !== undefined){
+  if (data.items[0] !== undefined) {
     return data.items[0].x;
-  }else{
-    return "no data";
+  } else {
+    return 'no data';
   }
 }
 
 async function getLati(id) {
-  const res = await fetch(`https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/listado_embalses/?q={"id_embalse":{"$eq":${id}}}`);
+  const res = await fetch(
+    `https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/listado_embalses/?q={"id_embalse":{"$eq":${id}}}`
+  );
   const data = await res.json();
 
-  if(data.items[0] !== undefined){
+  if (data.items[0] !== undefined) {
     return data.items[0].y;
-  }else{
-    return "no data";
+  } else {
+    return 'no data';
   }
+}
+
+// Función de Haversine para calcular la distancia entre dos puntos geodésicos
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  const toRadians = (degrees) => (degrees * Math.PI) / 180;
+
+  const R = 6371; // Radio de la Tierra en kilómetros
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distancia en kilómetros
 }
 
 export default function Home() {
   const [selectedEmbalse, setSelectedEmbalse] = useState(null);
   const [theme, setTheme] = useState<'light' | 'dark' | 'daltonic'>('light');
   const [isDyslexic, setIsDyslexic] = useState(false); // Usar la fuente normal por defecto
-
   const [coordinates, setCoordinates] = useState({ lat: '', lon: '', radius: '100' });
   const [showFilters, setShowFilters] = useState(false); // Estado para mostrar u ocultar los filtros
-
   const [embalses, setEmbalses] = useState([]);
+  const [filteredEmbalses, setFilteredEmbalses] = useState([]);
 
   useEffect(() => {
     async function fetchEmbalses() {
@@ -93,53 +114,52 @@ export default function Home() {
     fetchEmbalses();
   }, []);
 
-  // Usar la API de Geolocalización para obtener la ubicación real del dispositivo
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setCoordinates({ lat: latitude.toFixed(6), lon: longitude.toFixed(6), radius: '100' });
-        },
-        (error) => {
-          console.error("Error al obtener la ubicación: ", error);
-          // Puedes definir valores por defecto si la geolocalización falla
-          setCoordinates({ lat: "0.000000", lon: "0.000000", radius: '100' });
-        }
-      );
-    } else {
-      console.error("Geolocalización no es compatible con este navegador.");
-    }
-  }, []);
-
   const toggleTheme = (newTheme: 'light' | 'dark' | 'daltonic') => {
     setTheme(newTheme);
   };
 
   const toggleFont = () => {
-    setIsDyslexic(prev => !prev); // Alternar entre fuentes
+    setIsDyslexic((prev) => !prev); // Alternar entre fuentes
   };
 
   const handleCoordinateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setCoordinates(prev => ({ ...prev, [name]: value }));
+    setCoordinates((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Coordenadas:', coordinates);
+
+    const lat = parseFloat(coordinates.lat);
+    const lon = parseFloat(coordinates.lon);
+
+    // Calcular distancias y ordenar por proximidad
+    const embalsesConDistancia = embalses.map((embalse) => {
+      const distancia = haversineDistance(
+        lat,
+        lon,
+        parseFloat(embalse.latitud),
+        parseFloat(embalse.longitud)
+      );
+      return { ...embalse, distancia };
+    });
+
+    // Filtrar los 3 embalses más cercanos
+    const embalsesCercanos = embalsesConDistancia
+      .sort((a, b) => a.distancia - b.distancia)
+      .slice(0, 3);
+
+    setFilteredEmbalses(embalsesCercanos);
   };
 
   const handleBackToList = () => {
     setSelectedEmbalse(null);
   };
 
-  // Función para alternar el estado de los filtros
   const toggleFilters = () => {
     setShowFilters(!showFilters);
   };
 
-  // Efecto para cambiar el fondo del body al color del tema
   useEffect(() => {
     document.body.style.backgroundColor = themes[theme].background;
   }, [theme]);
@@ -182,7 +202,9 @@ export default function Home() {
             </InputField>
             <ButtonGroup>
               <Button type="submit" aria-label="Enviar">Enviar</Button>
-              <Button type="button" onClick={toggleFilters} aria-label="Filtros">Filtros</Button>
+              <Button type="button" onClick={toggleFilters} aria-label="Filtros">
+                Filtros
+              </Button>
             </ButtonGroup>
           </InputSection>
 
@@ -201,12 +223,17 @@ export default function Home() {
             </IconButton>
           </ThemeSwitch>
         </Header>
+
         {showFilters && (
           <FiltersSection>
             <h3>Filtros</h3>
             <FilterContainer>
               <FilterInput isDyslexic={isDyslexic}>
-                <input type="number" placeholder="Capacidad mínima" aria-label="Capacidad mínima" />
+                <input
+                  type="number"
+                  placeholder="Capacidad mínima"
+                  aria-label="Capacidad mínima"
+                />
               </FilterInput>
               <FilterInput isDyslexic={isDyslexic}>
                 <input type="text" placeholder="Localidad" aria-label="Localidad" />
@@ -223,7 +250,7 @@ export default function Home() {
             <>
               <h1>Lista de Embalses</h1>
               <EmbalseList>
-                {embalses.map((embalse) => (
+                {filteredEmbalses.map((embalse) => (
                   <EmbalseItem key={embalse.id} onClick={() => setSelectedEmbalse(embalse)}>
                     {embalse.id} - {embalse.embalse_nombre}
                   </EmbalseItem>
@@ -233,16 +260,20 @@ export default function Home() {
           ) : (
             <>
               <Breadcrumb>
-                <BreadcrumbItem onClick={handleBackToList} aria-label="Volver a la lista">Lista</BreadcrumbItem> &gt; Datos
+                <BreadcrumbItem onClick={handleBackToList} aria-label="Volver a la lista">
+                  Lista
+                </BreadcrumbItem> &gt; Datos
               </Breadcrumb>
               <EmbalseDetails>
                 <h2>{selectedEmbalse.embalse_nombre}</h2>
-                <p>ambito: {selectedEmbalse.ambito_nombre}</p>
-                <p>agua_total: {selectedEmbalse.agua_total}</p>
-                <p>electrico_flag: {selectedEmbalse.electrico_flag}</p>
-                <p>Coordenadas: {selectedEmbalse.longitud}, {selectedEmbalse.latitud}</p>
+                <p>Ambito: {selectedEmbalse.ambito_nombre}</p>
+                <p>Agua total: {selectedEmbalse.agua_total}</p>
+                <p>Electrico: {selectedEmbalse.electrico_flag}</p>
+                <p>Coordenadas: {selectedEmbalse.latitud}, {selectedEmbalse.longitud}</p>
               </EmbalseDetails>
-              <BackButton onClick={handleBackToList} aria-label="Volver">Volver</BackButton>
+              <BackButton onClick={handleBackToList} aria-label="Volver">
+                Volver
+              </BackButton>
             </>
           )}
         </MainSection>
