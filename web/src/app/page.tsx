@@ -83,6 +83,10 @@ export default function Home() {
     // Aquí podrías manejar las coordenadas (enviar a un backend, etc.)
   };
 
+  const handleBackToList = () => {
+    setSelectedEmbalse(null);
+  };
+
   // Efecto para cambiar el fondo del body al color del tema
   useEffect(() => {
     document.body.style.backgroundColor = themes[theme].background;
@@ -108,30 +112,30 @@ export default function Home() {
           </ThemeSwitch>
           <InputSection onSubmit={handleSubmit}>
             <InputField>
-              <label htmlFor="x">Coordenada X:</label>
               <input
                 type="text"
                 name="x"
                 value={coordinates.x}
                 onChange={handleCoordinateChange}
+                placeholder="Coordenada X"
               />
             </InputField>
             <InputField>
-              <label htmlFor="y">Coordenada Y:</label>
               <input
                 type="text"
                 name="y"
                 value={coordinates.y}
                 onChange={handleCoordinateChange}
+                placeholder="Coordenada Y"
               />
             </InputField>
             <InputField>
-              <label htmlFor="radius">Radio:</label>
               <input
                 type="text"
                 name="radius"
                 value={coordinates.radius}
                 onChange={handleCoordinateChange}
+                placeholder="Radio"
               />
             </InputField>
             <Button type="submit">Enviar</Button>
@@ -152,6 +156,9 @@ export default function Home() {
             </>
           ) : (
             <>
+              <Breadcrumb>
+                <BreadcrumbItem onClick={handleBackToList}>Lista</BreadcrumbItem> &gt; Datos
+              </Breadcrumb>
               <h1>Detalles del Embalse</h1>
               <EmbalseDetails>
                 <h2>{selectedEmbalse.nombre}</h2>
@@ -161,7 +168,7 @@ export default function Home() {
                 <p>Coordenadas: {selectedEmbalse.coordenadas}</p>
                 <p>Radio: {selectedEmbalse.radio}</p>
               </EmbalseDetails>
-              <BackButton onClick={() => setSelectedEmbalse(null)}>Volver</BackButton>
+              <BackButton onClick={handleBackToList}>Volver</BackButton>
             </>
           )}
         </MainSection>
@@ -178,6 +185,7 @@ const MainContent = styled.div<{ isDyslexic: boolean }>`
   height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Evitar que aparezca scroll en la parte principal */
 `;
 
 const Header = styled.header`
@@ -216,9 +224,13 @@ const InputSection = styled.form`
   padding: 10px;
   background: ${({ theme }) => theme.background};
   border: none; /* Cambiado a none para quitar el borde */
+  flex-wrap: wrap; /* Permitir que los inputs y botón se ajusten en varias líneas si es necesario */
+  overflow: hidden; /* Evitar que aparezca scroll en la sección de inputs */
 `;
 
 const InputField = styled.div`
+  flex-grow: 1; /* Hacer que el input crezca para ocupar espacio */
+  min-width: 150px; /* Establecer un ancho mínimo para inputs */
   display: flex;
   flex-direction: column;
 `;
@@ -266,4 +278,19 @@ const BackButton = styled.button`
   &:hover {
     background-color: #0056b3;
   }
+`;
+
+const Breadcrumb = styled.div`
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #007bff;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const BreadcrumbItem = styled.span`
+  margin-right: 5px;
 `;
