@@ -1,120 +1,73 @@
-"use client";
-import { useState, useEffect } from 'react';
-import styled from 'styled-components';
+// src/app/page.tsx
 
+"use client"; // Necesario para usar estado en componentes funcionales
+import { useState, useEffect } from 'react';
+import styled, { ThemeProvider } from 'styled-components';
+
+// Ejemplo de datos
 const embalsesEjemplo = [
-    { id: 1, nombre: 'Embalse A', capacidad: '1000 m³', localidad: 'Madrid', demarcacion: 'Tajo', x: "0", y: "0" },
-    { id: 2, nombre: 'Embalse B', capacidad: '2000 m³', localidad: 'Barcelona', demarcacion: 'Ebro', x: "75", y: "75" },
-    { id: 3, nombre: 'Embalse C', capacidad: '1500 m³', localidad: 'Valencia', demarcacion: 'Júcar', x: "150", y: "150" },
+  {
+    id: 1,
+    nombre: 'Embalse A',
+    capacidad: '1000 m³',
+    localidad: 'Madrid',
+    demarcacion: 'Tajo',
+    coordenadas: '40.4168° N, 3.7038° W',
+    radio: '50 m',
+  },
+  {
+    id: 2,
+    nombre: 'Embalse B',
+    capacidad: '2000 m³',
+    localidad: 'Barcelona',
+    demarcacion: 'Ebro',
+    coordenadas: '41.3888° N, 2.15899° E',
+    radio: '75 m',
+  },
+  {
+    id: 3,
+    nombre: 'Embalse C',
+    capacidad: '1500 m³',
+    localidad: 'Valencia',
+    demarcacion: 'Júcar',
+    coordenadas: '39.4699° N, -0.3763° W',
+    radio: '60 m',
+  },
 ];
 
-export default function Home({ toggleTheme, toggleFont }) {
-    const [selectedEmbalse, setSelectedEmbalse] = useState(null);
-    const [coords, setCoords] = useState({ lat: '', lon: '' });
-    const [radio, setRadio] = useState('100');
+// Definición de los temas
+const themes = {
+  light: {
+    background: '#f8f9fa',
+    color: '#212529',
+    buttonBackground: '#007bff',
+    buttonColor: '#fff',
+  },
+  dark: {
+    background: '#212529',
+    color: '#f8f9fa',
+    buttonBackground: '#007bff',
+    buttonColor: '#fff',
+  },
+  daltonic: {
+    background: '#FFD700',
+    color: '#5F4B8C',
+    buttonBackground: '#5F4B8C',
+    buttonColor: '#FFD700',
+  },
+};
 
-    useEffect(() => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    setCoords({ lat: latitude.toFixed(6), lon: longitude.toFixed(6) });
-                },
-                (error) => {
-                    console.error("Error al obtener la ubicación: ", error);
-                    // Puedes definir valores por defecto si la geolocalización falla
-                    setCoords({ lat: "0.000000", lon: "0.000000" });
-                }
-            );
-        } else {
-            console.error("Geolocalización no es compatible con este navegador.");
-        }
-    }, []);
+export default function Home() {
+  const [selectedEmbalse, setSelectedEmbalse] = useState(null);
+  const [theme, setTheme] = useState<'light' | 'dark' | 'daltonic'>('light');
+  const [isDyslexic, setIsDyslexic] = useState(false); // Usar la fuente normal por defecto
 
-<<<<<<< Updated upstream
-    const handleSearch = () => {
-        // Imprime los valores de las coordenadas y el radio en la consola
-        console.log('Coordenada X:', coords.lat);
-        console.log('Coordenada Y:', coords.lon);
-        console.log('Radio (km):', radio);
-    };
-=======
-  const [coordinates, setCoordinates] = useState({ lat: '', lon: '', radius: '100' });
->>>>>>> Stashed changes
+  const [coordinates, setCoordinates] = useState({ x: '', y: '', radius: '' });
 
-    return (
-        <Container>
-            <Header>
-                <SearchFilter>
-                    <div>
-                        <label>Coordenada X:</label>
-                        <input
-                            type="text"
-                            value={coords.lat}
-                            onChange={(e) => setCoords({ ...coords, lat: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label>Coordenada Y:</label>
-                        <input
-                            type="text"
-                            value={coords.lon}
-                            onChange={(e) => setCoords({ ...coords, lon: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label>Radio (km):</label>
-                        <input
-                            type="text"
-                            value={radio}
-                            onChange={(e) => setRadio(e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <button onClick={handleSearch}>Buscar</button>
-                    </div>
-                </SearchFilter>
-                <ThemeSwitch>
-                    <button onClick={() => toggleTheme('light')}>Tema Claro</button>
-                    <button onClick={() => toggleTheme('dark')}>Tema Oscuro</button>
-                    <button onClick={() => toggleTheme('daltonic')}>Tema Daltonico</button>
-                </ThemeSwitch>
-                <FontSwitch>
-                    <button onClick={toggleFont}>Cambiar Fuente</button>
-                </FontSwitch>
-            </Header>
+  const toggleTheme = (newTheme: 'light' | 'dark' | 'daltonic') => {
+    setTheme(newTheme);
+  };
 
-<<<<<<< Updated upstream
-            <MainContent>
-                {!selectedEmbalse ? (
-                    <>
-                        <Breadcrumbs>Lista</Breadcrumbs>
-                        <EmbalseList>
-                            {embalsesEjemplo.map((embalse) => (
-                                <EmbalseItem key={embalse.id} onClick={() => setSelectedEmbalse(embalse)}>
-                                    {embalse.nombre}
-                                </EmbalseItem>
-                            ))}
-                        </EmbalseList>
-                    </>
-                ) : (
-                    <>
-                        <Breadcrumbs>
-                            Lista &gt; Datos
-                            <BackButton onClick={() => setSelectedEmbalse(null)}>Volver</BackButton>
-                        </Breadcrumbs>
-                        <EmbalseDetails>
-                            <h2>{selectedEmbalse.nombre}</h2>
-                            <p>Capacidad: {selectedEmbalse.capacidad}</p>
-                            <p>Localidad: {selectedEmbalse.localidad}</p>
-                            <p>Demarcación: {selectedEmbalse.demarcacion}</p>
-                        </EmbalseDetails>
-                    </>
-                )}
-            </MainContent>
-        </Container>
-    );
-=======
   const toggleFont = () => {
     setIsDyslexic(prev => !prev); // Alternar entre fuentes
   };
@@ -128,6 +81,10 @@ export default function Home({ toggleTheme, toggleFont }) {
     e.preventDefault();
     console.log('Coordenadas:', coordinates);
     // Aquí podrías manejar las coordenadas (enviar a un backend, etc.)
+  };
+
+  const handleBackToList = () => {
+    setSelectedEmbalse(null);
   };
 
   // Efecto para cambiar el fondo del body al color del tema
@@ -155,30 +112,30 @@ export default function Home({ toggleTheme, toggleFont }) {
           </ThemeSwitch>
           <InputSection onSubmit={handleSubmit}>
             <InputField>
-              <label htmlFor="x">Latitud:</label>
               <input
                 type="text"
                 name="x"
-                value={coordinates.lat}
+                value={coordinates.x}
                 onChange={handleCoordinateChange}
+                placeholder="Coordenada X"
               />
             </InputField>
             <InputField>
-              <label htmlFor="y">Longitud:</label>
               <input
                 type="text"
                 name="y"
-                value={coordinates.lon}
+                value={coordinates.y}
                 onChange={handleCoordinateChange}
+                placeholder="Coordenada Y"
               />
             </InputField>
             <InputField>
-              <label htmlFor="radius">Radio:</label>
               <input
                 type="text"
                 name="radius"
                 value={coordinates.radius}
                 onChange={handleCoordinateChange}
+                placeholder="Radio"
               />
             </InputField>
             <Button type="submit">Enviar</Button>
@@ -199,6 +156,9 @@ export default function Home({ toggleTheme, toggleFont }) {
             </>
           ) : (
             <>
+              <Breadcrumb>
+                <BreadcrumbItem onClick={handleBackToList}>Lista</BreadcrumbItem> &gt; Datos
+              </Breadcrumb>
               <h1>Detalles del Embalse</h1>
               <EmbalseDetails>
                 <h2>{selectedEmbalse.nombre}</h2>
@@ -208,59 +168,77 @@ export default function Home({ toggleTheme, toggleFont }) {
                 <p>Coordenadas: {selectedEmbalse.coordenadas}</p>
                 <p>Radio: {selectedEmbalse.radio}</p>
               </EmbalseDetails>
-              <BackButton onClick={() => setSelectedEmbalse(null)}>Volver</BackButton>
+              <BackButton onClick={handleBackToList}>Volver</BackButton>
             </>
           )}
         </MainSection>
       </MainContent>
     </ThemeProvider>
   );
->>>>>>> Stashed changes
 }
 
-const Container = styled.div`
+// Estilos de los componentes
+const MainContent = styled.div<{ isDyslexic: boolean }>`
+  padding: 20px;
+  font-family: ${({ isDyslexic }) => (isDyslexic ? 'var(--font-opendyslexic)' : 'Arial, sans-serif')}; // Usar la fuente disléxica o Arial
+  color: ${({ theme }) => theme.color};
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  overflow: hidden; /* Evitar que aparezca scroll en la parte principal */
 `;
 
-const Header = styled.div`
+const Header = styled.header`
+  display: flex;
+  flex-wrap: wrap; // Permitir que los elementos se muevan a la siguiente línea en pantallas más pequeñas
+  justify-content: space-between;
+  align-items: center;
   padding: 20px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background: ${({ theme }) => theme.background};
 `;
 
-const SearchFilter = styled.div`
+const ThemeSwitch = styled.div`
   display: flex;
   gap: 10px;
 `;
 
-const ThemeSwitch = styled.div`
-  margin-top: 10px;
-  button {
-    margin-right: 10px;
+const Button = styled.button`
+  background: ${({ theme }) => theme.buttonBackground};
+  color: ${({ theme }) => theme.buttonColor};
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #0056b3;
   }
 `;
 
-const FontSwitch = styled.div`
-  margin-top: 10px;
-  button {
-    margin-right: 10px;
-  }
+const InputSection = styled.form`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  padding: 10px;
+  background: ${({ theme }) => theme.background};
+  border: none; /* Cambiado a none para quitar el borde */
+  flex-wrap: wrap; /* Permitir que los inputs y botón se ajusten en varias líneas si es necesario */
+  overflow: hidden; /* Evitar que aparezca scroll en la sección de inputs */
 `;
 
-const MainContent = styled.div`
+const InputField = styled.div`
+  flex-grow: 1; /* Hacer que el input crezca para ocupar espacio */
+  min-width: 150px; /* Establecer un ancho mínimo para inputs */
+  display: flex;
+  flex-direction: column;
+`;
+
+const MainSection = styled.main`
   padding: 20px;
   flex-grow: 1;
-`;
-
-const Breadcrumbs = styled.div`
-  margin-bottom: 20px;
-  font-size: 18px;
-`;
-
-const BackButton = styled.button`
-  margin-left: 20px;
+  overflow-y: auto; /* Permitir el desplazamiento vertical si es necesario */
 `;
 
 const EmbalseList = styled.div`
@@ -271,8 +249,10 @@ const EmbalseList = styled.div`
 
 const EmbalseItem = styled.div`
   padding: 10px;
-  border: 1px solid #ccc;
+  border: none; /* Cambiado a none para quitar el borde */
   cursor: pointer;
+  background-color: #ffffff;
+  transition: background-color 0.3s;
 
   &:hover {
     background-color: #e9ecef;
@@ -281,5 +261,36 @@ const EmbalseItem = styled.div`
 
 const EmbalseDetails = styled.div`
   padding: 10px;
-  border: 1px solid #ccc;
+  border: none; /* Cambiado a none para quitar el borde */
+  background-color: #ffffff;
+`;
+
+const BackButton = styled.button`
+  margin-top: 20px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+const Breadcrumb = styled.div`
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #007bff;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const BreadcrumbItem = styled.span`
+  margin-right: 5px;
 `;

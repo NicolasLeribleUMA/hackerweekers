@@ -1,23 +1,21 @@
-import { Metadata } from "next";
+// src/app/layout.tsx
 
-export const metadata: Metadata = {
-  title: {
-    default: "Botijo",
-    template: "%s | Botijo"
-  },
-  description: 'Generated with Next.js',
-}
+import localFont from '@next/font/local';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+const openDyslexic = localFont({
+  src: '../public/fonts/OpenDyslexic-Regular.otf',
+  variable: '--font-opendyslexic',
+});
+
+export const metadata = {
+  title: 'Embalses',
+  description: 'Datos sobre embalses',
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>
-        {children}
-      </body>
+    <html lang="es" className={`${openDyslexic.variable}`}>
+      <body>{children}</body>
     </html>
-  )
+  );
 }
