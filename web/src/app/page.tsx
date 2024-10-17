@@ -62,7 +62,26 @@ export default function Home() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'daltonic'>('light');
   const [isDyslexic, setIsDyslexic] = useState(false); // Usar la fuente normal por defecto
 
-  const [coordinates, setCoordinates] = useState({ x: '', y: '', radius: '' });
+  const [coordinates, setCoordinates] = useState({ lat: '', lon: '', radius: '' });
+
+  // Usar la API de Geolocalización para obtener la ubicación real del dispositivo
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCoordinates({ lat: latitude.toFixed(6), lon: longitude.toFixed(6), radius: '100' });
+        },
+        (error) => {
+          console.error("Error al obtener la ubicación: ", error);
+          // Puedes definir valores por defecto si la geolocalización falla
+          setCoordinates({ lat: "0.000000", lon: "0.000000", radius: '100' });
+        }
+      );
+    } else {
+      console.error("Geolocalización no es compatible con este navegador.");
+    }
+  }, []);
 
   const toggleTheme = (newTheme: 'light' | 'dark' | 'daltonic') => {
     setTheme(newTheme);
@@ -115,7 +134,7 @@ export default function Home() {
               <input
                 type="text"
                 name="x"
-                value={coordinates.x}
+                value={coordinates.lat}
                 onChange={handleCoordinateChange}
                 placeholder="Coordenada X"
               />
@@ -124,7 +143,7 @@ export default function Home() {
               <input
                 type="text"
                 name="y"
-                value={coordinates.y}
+                value={coordinates.lon}
                 onChange={handleCoordinateChange}
                 placeholder="Coordenada Y"
               />
