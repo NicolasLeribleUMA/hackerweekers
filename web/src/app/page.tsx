@@ -2,37 +2,6 @@
 import { useState, useEffect } from 'react';
 import styled, { ThemeProvider } from 'styled-components';
 
-// Ejemplo de datos
-const embalsesEjemplo = [
-  {
-    id: 1,
-    nombre: 'Embalse A',
-    capacidad: '1000 m³',
-    localidad: 'Madrid',
-    demarcacion: 'Tajo',
-    coordenadas: '40.4168° N, 3.7038° W',
-    radio: '50 m',
-  },
-  {
-    id: 2,
-    nombre: 'Embalse B',
-    capacidad: '2000 m³',
-    localidad: 'Barcelona',
-    demarcacion: 'Ebro',
-    coordenadas: '41.3888° N, 2.15899° E',
-    radio: '75 m',
-  },
-  {
-    id: 3,
-    nombre: 'Embalse C',
-    capacidad: '1500 m³',
-    localidad: 'Valencia',
-    demarcacion: 'Júcar',
-    coordenadas: '39.4699° N, -0.3763° W',
-    radio: '60 m',
-  },
-];
-
 // Definición de los temas
 const themes = {
   light: {
@@ -68,13 +37,74 @@ const themes = {
   },
 };
 
+async function getEmbalses() {
+  const res = await fetch('https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/embalses/');
+  const data = await res.json();
+
+  getLong(145)
+  // Extraer y devolver una lista de objetos con id y ambito_nombre
+  return data.items.map(item => ({
+    id: item.id,               
+    embalse_nombre: item.embalse_nombre,
+    ambito_nombre: item.ambito_nombre,
+    agua_total: item.agua_total,
+    electrico_flag: item.electrico_flag,
+    longitud: getLong(item.id)
+  }));
+}
+
+async function getLong(id) {
+  const res = await fetch(`https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/listado_embalses/?q={"id_embalse":{"$eq":${id}}}`);
+  const data = await res.json();
+
+
+  console.log(data.items[0]);
+  if(data.items[0] != undefined){
+    return data.items[0].id_embalse;
+  }else{
+    return "no data";
+  }
+
+}
+
 export default function Home() {
   const [selectedEmbalse, setSelectedEmbalse] = useState(null);
   const [theme, setTheme] = useState<'light' | 'dark' | 'daltonic'>('light');
   const [isDyslexic, setIsDyslexic] = useState(false); // Usar la fuente normal por defecto
 
-  const [coordinates, setCoordinates] = useState({ lat: '', lon: '', radius: '' });
+  const [coordinates, setCoordinates] = useState({ lat: '', lon: '', radius: '100' });
   const [showFilters, setShowFilters] = useState(false); // Estado para mostrar u ocultar los filtros
+
+  const [embalses, setEmbalses] = useState([]);
+
+  getLong(145)
+
+  useEffect(() => {
+    async function fetchEmbalses() {
+      const data = await getEmbalses();
+      setEmbalses(data);
+    }
+    fetchEmbalses();
+  }, []);
+
+  // Usar la API de Geolocalización para obtener la ubicación real del dispositivo
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCoordinates({ lat: latitude.toFixed(6), lon: longitude.toFixed(6), radius: '100' });
+        },
+        (error) => {
+          console.error("Error al obtener la ubicación: ", error);
+          // Puedes definir valores por defecto si la geolocalización falla
+          setCoordinates({ lat: "0.000000", lon: "0.000000", radius: '100' });
+        }
+      );
+    } else {
+      console.error("Geolocalización no es compatible con este navegador.");
+    }
+  }, []);
 
   const toggleTheme = (newTheme: 'light' | 'dark' | 'daltonic') => {
     setTheme(newTheme);
@@ -116,7 +146,7 @@ export default function Home() {
           <InputSection onSubmit={handleSubmit}>
             <InputField isDyslexic={isDyslexic}>
               <input
-                type="text"
+                type="number"
                 name="lat"
                 value={coordinates.lat}
                 onChange={handleCoordinateChange}
@@ -125,7 +155,7 @@ export default function Home() {
             </InputField>
             <InputField isDyslexic={isDyslexic}>
               <input
-                type="text"
+                type="number"
                 name="lon"
                 value={coordinates.lon}
                 onChange={handleCoordinateChange}
@@ -134,7 +164,7 @@ export default function Home() {
             </InputField>
             <InputField isDyslexic={isDyslexic}>
               <input
-                type="text"
+                type="number"
                 name="radius"
                 value={coordinates.radius}
                 onChange={handleCoordinateChange}
@@ -186,9 +216,9 @@ export default function Home() {
             <>
               <h1>Lista de Embalses</h1>
               <EmbalseList>
-                {embalsesEjemplo.map((embalse) => (
+                {embalses.map((embalse) => (
                   <EmbalseItem key={embalse.id} onClick={() => setSelectedEmbalse(embalse)}>
-                    {embalse.nombre}
+                    {embalse.id} - {embalse.embalse_nombre}
                   </EmbalseItem>
                 ))}
               </EmbalseList>
@@ -199,11 +229,11 @@ export default function Home() {
                 <BreadcrumbItem onClick={handleBackToList}>Lista</BreadcrumbItem> &gt; Datos
               </Breadcrumb>
               <EmbalseDetails>
-                <h2>{selectedEmbalse.nombre}</h2>
-                <p>Capacidad: {selectedEmbalse.capacidad}</p>
-                <p>Localidad: {selectedEmbalse.localidad}</p>
-                <p>Demarcación: {selectedEmbalse.demarcacion}</p>
-                <p>Coordenadas: {selectedEmbalse.coordenadas}</p>
+                <h2>{selectedEmbalse.embalse_nombre}</h2>
+                <p>ambito: {selectedEmbalse.ambito_nombre}</p>
+                <p>agua_total: {selectedEmbalse.agua_total}</p>
+                <p>electrico_flag: {selectedEmbalse.electrico_flag}</p>
+                <p>Coordenadas: {selectedEmbalse.longitud}</p>
                 <p>Radio: {selectedEmbalse.radio}</p>
               </EmbalseDetails>
               <BackButton onClick={handleBackToList}>Volver</BackButton>
@@ -240,8 +270,8 @@ const IconButton = styled.button`
   img {
     width: 30px;
     height: 30px;
-    filter: ${({ theme }) => 
-      theme.name === 'daltonic' ? 'brightness(0) saturate(100%) invert(18%) sepia(85%) saturate(4402%) hue-rotate(225deg) brightness(86%) contrast(107%)' : 
+    filter: ${({ theme }) =>
+    theme.name === 'daltonic' ? 'brightness(0) saturate(100%) invert(18%) sepia(85%) saturate(4402%) hue-rotate(225deg) brightness(86%) contrast(107%)' :
       `brightness(0) saturate(100%) invert(${theme.svgColor === '#000' ? 0 : 1})`}; /* Morado para modo daltónico */
   }
 
@@ -343,7 +373,7 @@ const FiltersSection = styled.div`
   h3 {
     margin: 5px;
     color: ${({ theme }) =>
-      theme.name === 'dark' ? '#000' : theme.name === 'daltonic' ? '#FFD700' : theme.color}; /* Cambia el color del título "Filtros" */
+    theme.name === 'dark' ? '#000' : theme.name === 'daltonic' ? '#FFD700' : theme.color}; /* Cambia el color del título "Filtros" */
     text-align: center; /* Centrar el título */
   }
 `;
