@@ -41,7 +41,6 @@ async function getEmbalses() {
   const res = await fetch('https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/embalses/');
   const data = await res.json();
 
-  getLong(145)
   // Extraer y devolver una lista de objetos con id y ambito_nombre
   return data.items.map(item => ({
     id: item.id,               
@@ -49,7 +48,8 @@ async function getEmbalses() {
     ambito_nombre: item.ambito_nombre,
     agua_total: item.agua_total,
     electrico_flag: item.electrico_flag,
-    longitud: getLong(item.id)
+    longitud: getLong(item.id),
+    latitud: getLati(item.id)
   }));
 }
 
@@ -58,9 +58,21 @@ async function getLong(id) {
   const data = await res.json();
 
 
-  console.log(data.items[0]);
-  if(data.items[0] != undefined){
-    return data.items[0].id_embalse;
+  if(data.items[0] !== undefined){
+    return data.items[0].x;
+  }else{
+    return "no data";
+  }
+
+}
+
+async function getLati(id) {
+  const res = await fetch(`https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/listado_embalses/?q={"id_embalse":{"$eq":${id}}}`);
+  const data = await res.json();
+
+
+  if(data.items[0] !== undefined){
+    return data.items[0].y;
   }else{
     return "no data";
   }
@@ -233,7 +245,7 @@ export default function Home() {
                 <p>ambito: {selectedEmbalse.ambito_nombre}</p>
                 <p>agua_total: {selectedEmbalse.agua_total}</p>
                 <p>electrico_flag: {selectedEmbalse.electrico_flag}</p>
-                <p>Coordenadas: {selectedEmbalse.longitud}</p>
+                <p>Coordenadas: {selectedEmbalse.longitud}, {selectedEmbalse.latitud}</p>
                 <p>Radio: {selectedEmbalse.radio}</p>
               </EmbalseDetails>
               <BackButton onClick={handleBackToList}>Volver</BackButton>
