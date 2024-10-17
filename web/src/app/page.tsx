@@ -101,7 +101,7 @@ export default function Home() {
   const [selectedEmbalse, setSelectedEmbalse] = useState(null);
   const [theme, setTheme] = useState<'light' | 'dark' | 'daltonic'>('light');
   const [isDyslexic, setIsDyslexic] = useState(false); // Usar la fuente normal por defecto
-  const [coordinates, setCoordinates] = useState({ lat: '', lon: '', radius: '100' });
+  const [coordinates, setCoordinates] = useState({ lat: '36,726600', lon: '-4,470400', radius: '100' });
   const [showFilters, setShowFilters] = useState(false); // Estado para mostrar u ocultar los filtros
   const [embalses, setEmbalses] = useState([]);
   const [filteredEmbalses, setFilteredEmbalses] = useState([]);
