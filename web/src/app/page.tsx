@@ -57,26 +57,22 @@ async function getLong(id) {
   const res = await fetch(`https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/listado_embalses/?q={"id_embalse":{"$eq":${id}}}`);
   const data = await res.json();
 
-
   if(data.items[0] !== undefined){
     return data.items[0].x;
   }else{
     return "no data";
   }
-
 }
 
 async function getLati(id) {
   const res = await fetch(`https://g16469080dabc73-hackerweekers.adb.eu-madrid-1.oraclecloudapps.com/ords/admin/listado_embalses/?q={"id_embalse":{"$eq":${id}}}`);
   const data = await res.json();
 
-
   if(data.items[0] !== undefined){
     return data.items[0].y;
   }else{
     return "no data";
   }
-
 }
 
 export default function Home() {
@@ -88,8 +84,6 @@ export default function Home() {
   const [showFilters, setShowFilters] = useState(false); // Estado para mostrar u ocultar los filtros
 
   const [embalses, setEmbalses] = useState([]);
-
-  getLong(145)
 
   useEffect(() => {
     async function fetchEmbalses() {
@@ -163,6 +157,7 @@ export default function Home() {
                 value={coordinates.lat}
                 onChange={handleCoordinateChange}
                 placeholder="Latitud"
+                aria-label="Latitud"
               />
             </InputField>
             <InputField isDyslexic={isDyslexic}>
@@ -172,6 +167,7 @@ export default function Home() {
                 value={coordinates.lon}
                 onChange={handleCoordinateChange}
                 placeholder="Longitud"
+                aria-label="Longitud"
               />
             </InputField>
             <InputField isDyslexic={isDyslexic}>
@@ -181,28 +177,27 @@ export default function Home() {
                 value={coordinates.radius}
                 onChange={handleCoordinateChange}
                 placeholder="Radio"
+                aria-label="Radio"
               />
             </InputField>
             <ButtonGroup>
-              <Button type="submit">Enviar</Button>
-              <Button type="button" onClick={toggleFilters}>
-                Filtros
-              </Button>
+              <Button type="submit" aria-label="Enviar">Enviar</Button>
+              <Button type="button" onClick={toggleFilters} aria-label="Filtros">Filtros</Button>
             </ButtonGroup>
           </InputSection>
 
           <ThemeSwitch>
-            <IconButton onClick={() => toggleTheme('light')} title="Tema claro">
+            <IconButton onClick={() => toggleTheme('light')} aria-label="Tema claro">
               <img src="/icons/sun.svg" alt="Tema claro" />
             </IconButton>
-            <IconButton onClick={() => toggleTheme('dark')} title="Tema oscuro">
+            <IconButton onClick={() => toggleTheme('dark')} aria-label="Tema oscuro">
               <img src="/icons/moon.svg" alt="Tema oscuro" />
             </IconButton>
-            <IconButton onClick={() => toggleTheme('daltonic')} title="Tema daltónico">
+            <IconButton onClick={() => toggleTheme('daltonic')} aria-label="Tema daltónico">
               <img src="/icons/daltonic.svg" alt="Tema daltónico" />
             </IconButton>
-            <IconButton onClick={toggleFont} title="Cambiar a fuente disléxica">
-              <img src="/icons/dyslexia.svg" alt="Cambiar a fuente disléxica" />
+            <IconButton onClick={toggleFont} aria-label="Cambiar a fuente disléxica">
+              <img src="/icons/dyslexia.svg" alt="Fuente disléxica" />
             </IconButton>
           </ThemeSwitch>
         </Header>
@@ -211,13 +206,13 @@ export default function Home() {
             <h3>Filtros</h3>
             <FilterContainer>
               <FilterInput isDyslexic={isDyslexic}>
-                <input type="number" placeholder="Capacidad mínima" />
+                <input type="number" placeholder="Capacidad mínima" aria-label="Capacidad mínima" />
               </FilterInput>
               <FilterInput isDyslexic={isDyslexic}>
-                <input type="text" placeholder="Localidad" />
+                <input type="text" placeholder="Localidad" aria-label="Localidad" />
               </FilterInput>
               <FilterInput isDyslexic={isDyslexic}>
-                <input type="text" placeholder="Demarcación" />
+                <input type="text" placeholder="Demarcación" aria-label="Demarcación" />
               </FilterInput>
             </FilterContainer>
           </FiltersSection>
@@ -238,7 +233,7 @@ export default function Home() {
           ) : (
             <>
               <Breadcrumb>
-                <BreadcrumbItem onClick={handleBackToList}>Lista</BreadcrumbItem> &gt; Datos
+                <BreadcrumbItem onClick={handleBackToList} aria-label="Volver a la lista">Lista</BreadcrumbItem> &gt; Datos
               </Breadcrumb>
               <EmbalseDetails>
                 <h2>{selectedEmbalse.embalse_nombre}</h2>
@@ -246,9 +241,8 @@ export default function Home() {
                 <p>agua_total: {selectedEmbalse.agua_total}</p>
                 <p>electrico_flag: {selectedEmbalse.electrico_flag}</p>
                 <p>Coordenadas: {selectedEmbalse.longitud}, {selectedEmbalse.latitud}</p>
-                <p>Radio: {selectedEmbalse.radio}</p>
               </EmbalseDetails>
-              <BackButton onClick={handleBackToList}>Volver</BackButton>
+              <BackButton onClick={handleBackToList} aria-label="Volver">Volver</BackButton>
             </>
           )}
         </MainSection>
@@ -283,8 +277,9 @@ const IconButton = styled.button`
     width: 30px;
     height: 30px;
     filter: ${({ theme }) =>
-    theme.name === 'daltonic' ? 'brightness(0) saturate(100%) invert(18%) sepia(85%) saturate(4402%) hue-rotate(225deg) brightness(86%) contrast(107%)' :
-      `brightness(0) saturate(100%) invert(${theme.svgColor === '#000' ? 0 : 1})`}; /* Morado para modo daltónico */
+      theme.name === 'daltonic'
+        ? 'brightness(0) saturate(40%) invert(18%) sepia(85%) saturate(4402%) hue-rotate(270deg) brightness(50%) contrast(60%)'
+        : `brightness(0) saturate(40%) invert(${theme.svgColor === '#000' ? 0 : 1})`};
   }
 
   &:hover {
@@ -372,28 +367,39 @@ const InputField = styled.div<{ isDyslexic: boolean }>`
 
 const FiltersSection = styled.div`
   margin-top: 10px;
-  padding: 10px;
+  padding: 20px;
   background-color: ${({ theme }) =>
-    theme.name === 'dark' ? '#e0e0e0' : theme.name === 'daltonic' ? '#5F4B8C' : '#f1f1f1'};
+    theme.name === 'dark' ? '#2C2C2C' : theme.name === 'daltonic' ? '#5F4B8C' : '#FFFFFF'};
   color: ${({ theme }) =>
-    theme.name === 'dark' ? '#000' : theme.name === 'daltonic' ? '#FFD700' : theme.color};
+    theme.name === 'dark' ? '#FFFFFF' : theme.name === 'daltonic' ? '#FFD700' : theme.color};
   border: 1px solid #ccc;
-  border-radius: 5px;
-  max-width: 600px;
-  margin: 0 auto; /* Centrar la caja de filtros */
+  border-radius: 10px;
+  width: 70%; /* La ventana de filtros ocupará el 70% del ancho */
+  margin: 20px auto; /* Centrar la ventana en la página */
+
+  @media (max-width: 768px) {
+    width: 90%; /* En móviles, que ocupe el 90% del ancho */
+    padding: 15px;
+  }
 
   h3 {
-    margin: 5px;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
     color: ${({ theme }) =>
-    theme.name === 'dark' ? '#000' : theme.name === 'daltonic' ? '#FFD700' : theme.color}; /* Cambia el color del título "Filtros" */
-    text-align: center; /* Centrar el título */
+      theme.name === 'dark' ? '#FFFFFF' : theme.name === 'daltonic' ? '#FFD700' : theme.color};
+    text-align: center;
   }
 `;
 
 const FilterContainer = styled.div`
   display: flex;
-  justify-content: center; /* Centrar los inputs */
-  gap: 10px;
+  flex-direction: column;
+  gap: 15px;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    gap: 20px; /* Mayor espacio entre los inputs en pantallas grandes */
+  }
 `;
 
 const FilterInput = styled.div`
@@ -401,14 +407,27 @@ const FilterInput = styled.div`
   display: flex;
   flex-direction: column;
 
+  label {
+    margin-bottom: 5px;
+    font-size: 1rem;
+    color: ${({ theme }) => theme.color};
+  }
+
   input {
-    font-size: 1rem; /* Reducir un poco el tamaño de la fuente */
-    padding: 8px;    /* Reducir el padding para inputs más pequeños */
-    border: none;
-    border-radius: 4px;
-    background-color: ${({ theme }) => (theme.name === 'dark' ? '#f0f0f0' : '#fff')}; /* Fondo en modo oscuro */
+    padding: 10px;
+    font-size: 1.2rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: ${({ theme }) => (theme.name === 'dark' ? '#3A3A3A' : '#FFFFFF')};
+    color: ${({ theme }) => theme.color};
+
+    @media (max-width: 768px) {
+      font-size: 1rem;
+      padding: 8px; /* Ajuste de tamaño en móviles */
+    }
   }
 `;
+
 
 const MainSection = styled.main`
   padding: 20px;
@@ -424,9 +443,9 @@ const EmbalseList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
-  color: ${({ theme }) => theme.textColor || theme.color}; /* Color del texto para lista */
-  max-width: 800px; /* Ancho máximo en vistas grandes */
-  margin: 0 auto; /* Centramos en vistas grandes */
+  color: ${({ theme }) => theme.textColor || theme.color};
+  max-width: 800px;
+  margin: 0 auto;
 `;
 
 const EmbalseItem = styled.div`
@@ -440,39 +459,39 @@ const EmbalseItem = styled.div`
     background-color: #e9ecef;
   }
 
-  color: ${({ theme }) => theme.textColor || theme.color}; /* Color del texto para items */
+  color: ${({ theme }) => theme.textColor || theme.color};
 `;
 
 const EmbalseDetails = styled.div`
   padding: 10px;
   border: 1px solid #ccc;
-  background-color: ${({ theme }) => theme.embalseBackground || theme.background}; /* Fondo blanco en modo oscuro y daltónico */
-  color: ${({ theme }) => theme.textColor || theme.color}; /* Aplicar el color de texto */
-  border-radius: 5px; /* Darle bordes redondeados */
-  max-width: 800px; /* Ancho máximo en vistas grandes */
-  margin: 0 auto; /* Centramos en vistas grandes */
-  
+  background-color: ${({ theme }) => theme.embalseBackground || theme.background};
+  color: ${({ theme }) => theme.textColor || theme.color};
+  border-radius: 5px;
+  max-width: 800px;
+  margin: 0 auto;
+
   h2 {
     margin-bottom: 10px;
-    color: ${({ theme }) => theme.textColor || theme.color}; /* Asegurar que el título tenga el color adecuado */
+    color: ${({ theme }) => theme.textColor || theme.color};
   }
 
   p {
     margin: 5px 0;
-    color: ${({ theme }) => theme.textColor || theme.color}; /* Asegurar que los párrafos tengan el color adecuado */
+    color: ${({ theme }) => theme.textColor || theme.color};
   }
 `;
 
 const BackButton = styled(Button)`
   display: block;
-  margin: 20px auto; /* Centramos el botón de "Volver" */
+  margin: 20px auto;
 `;
 
 const Breadcrumb = styled.div`
   margin-bottom: 10px;
   font-size: 16px;
   cursor: pointer;
-  color: ${({ theme }) => theme.breadcrumbColor}; /* Color dinámico según el tema */
+  color: ${({ theme }) => theme.breadcrumbColor};
 
   &:hover {
     text-decoration: underline;
@@ -481,8 +500,9 @@ const Breadcrumb = styled.div`
 
 const BreadcrumbItem = styled.span`
   margin-right: 5px;
-  text-decoration: underline; /* Solo subraya "Lista" */
+  text-decoration: underline;
+
   &:hover {
-    outline: 1px solid blue; /* Cambiar el estilo del outline solo para "Lista" */
+    outline: 1px solid blue;
   }
 `;
