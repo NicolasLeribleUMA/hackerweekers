@@ -1,0 +1,11 @@
+@font-face {
+    font-family: 'OpenDyslexic';
+    src: url('/fonts/OpenDyslexic-Regular.otf') format('opentype');
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
